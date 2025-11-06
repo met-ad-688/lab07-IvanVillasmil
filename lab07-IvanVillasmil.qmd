@@ -22,20 +22,73 @@ execute:
   freeze: true
 ---
 
+# Part 1: Load the Dataset
+```{python}
+# Loading required libraries
+import numpy as np
+import pandas as pd
+import plotly.express as px
+import plotly.io as pio
+import plotly.graph_objects as go
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, split, explode, regexp_replace, transform, when
+from pyspark.sql.functions import to_date, monotonically_increasing_id, expr
+from pyspark.sql import functions as F
+import re
+
+np.random.seed(950)
+
+pio.renderers.default = "notebook"
+
+# Initializing Spark Session
+spark = SparkSession.builder.appName("LightcastData").getOrCreate()
+
+# Uploading CSV file into a Spark DataFrame
+df = spark.read.option("header", "true").option("inferSchema", "true").option("multiLine","true").option("escape", "\"").csv("./data/lightcast_job_postings.csv")
+
+# Verifying Data: Display Schema (column names & data types)
+# print("---This is Diagnostic check, No need to print it in the final doc---") # Comment line when rendering the submission
+# df.printSchema() # Comment line when rendering the submission
+
+# Verifying Data: Display first five rows
+# print("---This is Diagnostic check, No need to print it in the final doc---") # Comment line when rendering the submission
+df.show(20)  # Comment line when rendering the submission
+
+# Typecasting numeric columns to double
+df_cleaned = df.withColumn("SALARY", col("SALARY").cast("double"))
+df_cleaned = df.withColumn("SALARY_FROM", col("SALARY_FROM").cast("double"))
+df_cleaned = df.withColumn("SALARY_TO", col("SALARY_TO").cast("double"))
+df_cleaned = df.withColumn("MIN_YEARS_EXPERIENCE", col("MIN_YEARS_EXPERIENCE").cast("double"))
+df_cleaned = df.withColumn("MAX_YEARS_EXPERIENCE", col("MAX_YEARS_EXPERIENCE").cast("double"))
+df_cleaned = df.withColumn("DURATION", col("DURATION").cast("double"))
+df_cleaned = df.withColumn("MODELED_DURATION", col("MODELED_DURATION").cast("double"))
+
+# Typecasting date columns to M/d/yyyy
+df_cleaned = df.withColumn("POSTED", to_date(col("POSTED"), "M/d/yyyy"))
+df_cleaned = df.withColumn("EXPIRED", to_date(col("EXPIRED"), "M/d/yyyy"))
+df_cleaned = df.withColumn("LAST_UPDATED_DATE", to_date(col("LAST_UPDATED_DATE"), "M/d/yyyy"))
+df_cleaned = df.withColumn("MODELED_EXPIRED", to_date(col("MODELED_EXPIRED"), "M/d/yyyy"))
+
+# Verifying schema
+df_cleaned.select(
+    "SALARY", "SALARY_FROM", "SALARY_TO",
+    "MIN_YEARS_EXPERIENCE", "MAX_YEARS_EXPERIENCE",
+    "DURATION", "MODELED_DURATION",
+    "POSTED", "EXPIRED", "LAST_UPDATED_DATE", "MODELED_EXPIRED"
+).printSchema()
+
+# Registering DataFrame as Temporary SQL table
+df_cleaned.createOrReplaceTempView("job_postings")
+```
+
+# Part 2: Data Cleaning and Typecasting
 ```{python}
 ```
 
+# Part 3: Salary by Education Level
 ```{python}
 ```
 
-```{python}
-```
-
-```{python}
-```
-
-```{python}
-```
-
+# Part 4: Salary by Remote Work Type
 ```{python}
 ```
